@@ -1,4 +1,76 @@
-# Initialize development environment
+# What is Sunlumo?
+
+Sunlumo is a platform built on top of QGIS that enables users to manage their
+spatial data. The core concept of the platform is to use a single QGIS Project
+file and provide services to various user groups. For example, an expert user
+would use QGIS Desktop for any purpose, a basic user could use the same
+project on a customized QGIS application with limited functionality and an
+anonymous (web user) could use a WebGIS interface to browse and query spatial
+data.
+
+Current development endeavours are focused on recreating QGIS Server and QGIS
+WebClient on Django framework by utilizing QGIS Python API.
+
+## Concepts
+
+Sunlumo Mapserver responds to WMS GetMap requests, but it's will probably
+never be a fully compliant WMS service. The main reason why we opted to WMS
+requests is support for WMS protocol in JavaScript WebMapping clients. Almost
+all requests use some non standard request parameters which foster tighter
+integration with QGIS platform through QGIS API.
+
+Every request must reference a QGS project file, and at the moment it's
+referenced as a *MAP* request parameter. In theory, a Sunlumo Mapserver should
+be able to provide services for an arbitrary QGS project file.
+
+## Supported features
+
+### LayerControl
+
+* every layer or a group of layers has following functionality:
+  * 'eye' icon toggles visibility
+  * 'info' icon toggles map search (GetFeatureInfo)
+  * 'gear' icon opens layer options panel that enables setting layer transparency
+
+* a layer group can be expanded or collapsed (initially this is read from the QGS project file)
+* click and drag enables layer/group reordering (only works in Mozilla Firefox)
+
+### MapSearchControl
+
+* layers that have active 'info' icon will be searched on map click
+* results will be shown in a panel
+  * initially, every record is closed, clicking on it will show it's attributes
+  * clicking on the 'location' icon will zoom the map to record location and highlight it
+
+### SimilaritySearchControl
+
+* similarity search is based on PostgreSQL pg_trgm index and based by prebuilt indices which are simple attribute concatenations
+* '+' operator allows further search specialization, for example, results for the search string 'nik + 4' are going to include all records that have a string 'nik' followed by a string '4'
+* clicking on the search result will zoom the map to the clicked record
+
+### Toolbox
+
+* measuring distances and areas
+  * it's working but it needs a lot of work
+
+### PrintControl
+
+* select scale and prepared print layout (QGIS Composer)
+  * after showing the area, it's possible to move the print frame
+  * printing will produce a PDF file
+
+## Planned features
+
+### Administrative interface
+
+* manage everything about a QGIS Project, layers, search indices
+* user access privileges for project/layer/index
+
+## Ideas
+
+# Development
+
+## Initialize development environment
 
 This project is based on Ubuntu 14.04 and official QGIS community repository.
 At the moment it's best to use to use a container or a virtual machine for
@@ -22,7 +94,7 @@ apt-get install vim qgis qgis-server python-pip libpq-dev libpython-dev git curl
 ```
 
 
-# Getting started
+## Getting started
 
 After forking and cloning the repository, everything else is pretty much
 standard for every Python Django project.
@@ -63,7 +135,7 @@ When developing JS or CSS is probably best to open a new terminal and execute:
 the project folders and run a set of tasks that will browserify JS and combine
 and compress CSS.
 
-## Development server
+### Development server
 
 QGIS is based on QT framework and as such it's not really friendly towards
 Python threads (GIL). To work around these issues we need to execute it in a
@@ -74,7 +146,7 @@ export DJANGO_SETTINGS_MODULE=core.settings.dev_username
 python manage.py runserver 0.0.0.0:8000 --nothreading
 ```
 
-## Running tests
+### Running tests
 
 Tests are executed in the *production like* environment. Create your own
 developer specific settings and customize to it to your liking.
